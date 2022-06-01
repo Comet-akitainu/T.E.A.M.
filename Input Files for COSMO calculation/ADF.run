@@ -1,0 +1,112 @@
+#! /bin/sh
+"$ADFBIN/adf" <<eor
+    Atoms
+	N          1.15344       -0.05177       -0.10333
+	C          2.31038       -0.02419       -0.10100
+	C          3.74952        0.01069       -0.09807
+	C          4.42060        1.23819       -0.09791
+	C          5.81996        1.28079       -0.09501
+	I          6.74381        3.18893       -0.09501
+	C          6.55860        0.07770       -0.09224
+	C          5.87805       -1.15084       -0.09245
+	C          4.47978       -1.18206       -0.09536
+	I          6.93992       -2.98067       -0.08840
+	O          7.90889        0.07623       -0.08934
+	H          3.85707        2.16361       -0.10002
+	H          3.96530       -2.13559       -0.09548
+	H          8.44489        0.87977       -0.08890
+    End
+    Basis
+        Type TZP
+        Core Small
+        CreateOutput None
+    End
+    #NoPrint LOGFILE
+    XC
+        GGA BP86
+    End
+    Relativistic Scalar ZORA
+    Geometry
+        Iterations 400
+        Step  Rad=0.02
+        Hessupd BFGS
+        Converge  Grad=0.002
+    End
+    BeckeGrid
+        Quality Good
+    End
+    NumericalQuality Good
+    SCF
+        Mixing 0.05
+    End
+eor
+
+mv TAPE21 cosmo.t21
+
+"$ADFBIN/adf" << eor
+    Atoms
+	N          1.15344       -0.05177       -0.10333
+	C          2.31038       -0.02419       -0.10100
+	C          3.74952        0.01069       -0.09807
+	C          4.42060        1.23819       -0.09791
+	C          5.81996        1.28079       -0.09501
+	I          6.74381        3.18893       -0.09501
+	C          6.55860        0.07770       -0.09224
+	C          5.87805       -1.15084       -0.09245
+	C          4.47978       -1.18206       -0.09536
+	I          6.93992       -2.98067       -0.08840
+	O          7.90889        0.07623       -0.08934
+	H          3.85707        2.16361       -0.10002
+	H          3.96530       -2.13559       -0.09548
+	H          8.44489        0.87977       -0.08890
+    End
+    SYMMETRY NOSYM
+    SOLVATION
+        Surf Delley
+        Solv name=CRS cav0=0.0 cav1=0.0
+        Charged method=CONJ corr
+        C-Mat EXACT
+        SCF VAR ALL
+        CSMRSP
+        RADII
+        H  1.30
+        C  2.00
+        N  1.83
+        O  1.72
+        F  1.72
+        Si 2.48
+        P  2.13
+        S  2.16
+        Cl 2.05
+        Br 2.16
+        I  2.32
+        SUBEND
+    END
+    BASIS
+        type TZP
+        core Small
+        createoutput None
+    END
+    XC
+        GGA BP86
+    END
+    RELATIVISTIC Scalar ZORA
+    RESTART
+        File cosmo.t21
+    END
+    BeckeGrid
+        Quality Good
+    END
+    ZlmFit
+        Quality Normal
+    End
+    SCF
+        Iterations 300
+        Mixing 0.05
+        AccelerationMethod ADIIS
+    End
+eor
+
+rm -f COSKF
+"$ADFBIN/cpkf" TAPE21 COSKF COSMO
+kf2cosmo COSKF molecule.cosmo
